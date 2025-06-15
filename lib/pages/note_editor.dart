@@ -3,81 +3,97 @@ import 'package:provider/provider.dart';
 import '../models/note.dart';
 import '../models/note_data.dart';
 
-class NoteEditor extends StatefulWidget {
+class NoteEditorPage extends StatefulWidget {
   final Note? note;
-  const NoteEditor({super.key, this.note});
+
+  const NoteEditorPage({Key? key, this.note}) : super(key: key);
 
   @override
-  State<NoteEditor> createState() => _NoteEditorState();
+  State<NoteEditorPage> createState() => _NoteEditorPageState();
 }
 
-class _NoteEditorState extends State<NoteEditor> {
-  late TextEditingController titleController;
-  late TextEditingController contentController;
+class _NoteEditorPageState extends State<NoteEditorPage> {
+  late final TextEditingController titleCtrl;
+  late final TextEditingController contentCtrl;
+  bool get isEditing => widget.note != null;
 
   @override
   void initState() {
     super.initState();
-    titleController = TextEditingController(text: widget.note?.title ?? '');
-    contentController = TextEditingController(text: widget.note?.content ?? '');
+    titleCtrl = TextEditingController(text: widget.note?.title);
+    contentCtrl = TextEditingController(text: widget.note?.content);
+  }
+
+  @override
+  void dispose() {
+    titleCtrl.dispose();
+    contentCtrl.dispose();
+    super.dispose();
+  }
+
+  void saveNote() {
+    final title = titleCtrl.text.trim();
+    final content = contentCtrl.text.trim();
+    if (title.isEmpty && content.isEmpty) return;
+
+    final newNote = Note(
+      title: title,
+      content: content,
+      timestamp: DateTime.now(),
+    );
+
+    final provider =
+    Provider.of<NoteDataProvider>(context, listen: false);
+
+    if (isEditing) {
+      provider.updateNote(widget.note!, newNote);
+    } else {
+      provider.addNote(newNote);
+    }
+
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = widget.note != null;
-
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditing ? 'Edit Note' : 'New Note'),
-        backgroundColor: Colors.transparent,
-        actions: isEditing
-            ? [
+        title: Text(isEditing ? 'Edit Note' : 'Add Note'),
+        actions: [
           IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () {
-              Provider.of<NoteDataProvider>(context, listen: false).deleteNote(widget.note!);
-              Navigator.pop(context);
-            },
+            onPressed: saveNote,
+            icon: const Icon(Icons.check),
           )
-        ]
-            : null,
+        ],
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             TextField(
-              controller: titleController,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              decoration: const InputDecoration(border: InputBorder.none, hintText: 'Title'),
+              controller: titleCtrl,
+              style: theme.textTheme.titleLarge,
+              decoration: const InputDecoration(
+                hintText: 'Title',
+                border: InputBorder.none,
+              ),
             ),
             Expanded(
               child: TextField(
-                controller: contentController,
-                style: const TextStyle(fontSize: 16),
+                controller: contentCtrl,
+                style: theme.textTheme.bodyMedium,
+                decoration: const InputDecoration(
+                  hintText: 'Type your notes here...',
+                  border: InputBorder.none,
+                ),
+                keyboardType: TextInputType.multiline,
                 maxLines: null,
-                decoration: const InputDecoration(border: InputBorder.none, hintText: 'Type something...'),
+                expands: true,
               ),
-            ),
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final title = titleController.text.trim();
-          final content = contentController.text.trim();
-          if (title.isEmpty || content.isEmpty) return;
-
-          final noteProvider = Provider.of<NoteDataProvider>(context, listen: false);
-          if (isEditing) {
-            noteProvider.updateNote(widget.note!, title, content);
-          } else {
-            noteProvider.addNote(title, content);
-          }
-          Navigator.pop(context);
-        },
-        backgroundColor: Colors.yellow[700],
-        child: const Icon(Icons.save, color: Colors.black),
       ),
     );
   }
