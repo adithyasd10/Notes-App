@@ -1,4 +1,3 @@
-// lib/models/note_data.dart
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'note.dart';

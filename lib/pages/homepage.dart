@@ -1,134 +1,63 @@
-// lib/pages/homepage.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/note.dart';
 import '../models/note_data.dart';
+import 'note_editor.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  String searchQuery = '';
-
-  void showNoteDialog({Note? existingNote}) {
-    String title = existingNote?.title ?? '';
-    String content = existingNote?.content ?? '';
-    final isEditing = existingNote != null;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isEditing ? 'Edit Note' : 'New Note'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: TextEditingController(text: title),
-              onChanged: (val) => title = val,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            TextField(
-              controller: TextEditingController(text: content),
-              onChanged: (val) => content = val,
-              decoration: const InputDecoration(labelText: 'Content'),
-              maxLines: 3,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              if (title.isEmpty || content.isEmpty) return;
-              final noteData =
-              Provider.of<NoteDataProvider>(context, listen: false);
-              if (isEditing) {
-                noteData.updateNote(existingNote!, title, content);
-              } else {
-                noteData.addNote(title, content);
-              }
-              Navigator.pop(context);
-            },
-            child: Text(isEditing ? 'Update' : 'Add'),
-          ),
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final noteData = Provider.of<NoteDataProvider>(context);
-    final notes = searchQuery.isEmpty
-        ? noteData.allNotes
-        : noteData.searchNotes(searchQuery);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notes App'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              showSearchDialog();
-            },
-          )
-        ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Your Notes', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
       ),
-      body: notes.isEmpty
-          ? const Center(child: Text('No notes yet.'))
-          : ListView.builder(
-        itemCount: notes.length,
-        itemBuilder: (_, i) {
-          final note = notes[i];
-          return ListTile(
-            title: Text(note.title),
-            subtitle: Text(note.content),
-            onTap: () => showNoteDialog(existingNote: note),
-            trailing: IconButton(
-              icon: const Icon(Icons.delete),
-              onPressed: () =>
-                  Provider.of<NoteDataProvider>(context, listen: false)
-                      .deleteNote(note),
-            ),
-          );
-        },
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: ListView.builder(
+          itemCount: noteData.allNotes.length,
+          itemBuilder: (context, index) {
+            final note = noteData.allNotes[index];
+            return GestureDetector(
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => NoteEditor(note: note)),
+              ),
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF3B0),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(note.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                    const SizedBox(height: 8),
+                    Text(note.content, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    const SizedBox(height: 8),
+                    Text("${note.timestamp.toLocal()}".split(' ')[0]),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => showNoteDialog(),
-        child: const Icon(Icons.add),
+        onPressed: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const NoteEditor()),
+        ),
+        backgroundColor: Colors.yellow[700],
+        child: const Icon(Icons.add, color: Colors.black),
       ),
-    );
-  }
-
-  void showSearchDialog() {
-    showDialog(
-      context: context,
-      builder: (_) {
-        String tempQuery = searchQuery;
-        return AlertDialog(
-          title: const Text('Search Notes'),
-          content: TextField(
-            autofocus: true,
-            decoration: const InputDecoration(hintText: 'Enter keyword...'),
-            onChanged: (val) => tempQuery = val,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  searchQuery = tempQuery;
-                });
-                Navigator.pop(context);
-              },
-              child: const Text('Search'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
