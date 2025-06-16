@@ -50,4 +50,13 @@ class NoteDataProvider extends ChangeNotifier {
           note.content.toLowerCase().contains(query);
     }).toList();
   }
+  void toggleFavorite(Note note) {
+    final index = _notes.indexOf(note);
+    if (index != -1) {
+      _notes[index].isFavorite = !_notes[index].isFavorite;
+      saveNotes();
+      notifyListeners();
+    }
+  }
+
 }

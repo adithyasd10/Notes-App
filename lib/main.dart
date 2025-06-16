@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'models/note_data.dart';
 import 'pages/homepage.dart';
+
 void main() {
   runApp(
     ChangeNotifierProvider(
@@ -42,8 +43,7 @@ final ThemeData lightTheme = ThemeData(
   primaryColor: Colors.black,
   iconTheme: const IconThemeData(color: Colors.black87),
   textTheme: const TextTheme(
-    titleLarge:
-    TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w600),
+    titleLarge: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.w600),
     bodyMedium: TextStyle(color: Colors.black87, fontSize: 16),
   ),
   appBarTheme: const AppBarTheme(
@@ -63,8 +63,7 @@ final ThemeData darkTheme = ThemeData(
   primaryColor: Colors.white,
   iconTheme: const IconThemeData(color: Colors.white70),
   textTheme: const TextTheme(
-    titleLarge:
-    TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
+    titleLarge: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w600),
     bodyMedium: TextStyle(color: Colors.white70, fontSize: 16),
   ),
   appBarTheme: const AppBarTheme(

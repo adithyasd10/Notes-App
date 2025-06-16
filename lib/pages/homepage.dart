@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/note.dart';
+import 'add_note_page.dart';
+import 'package:google_nav_bar/google_nav_bar.dart';
 
 class HomePage extends StatefulWidget {
   final VoidCallback toggleTheme;
   final bool isDarkMode;
 
-  const HomePage({Key? key, required this.toggleTheme, required this.isDarkMode}) : super(key: key);
+  const HomePage({
+    Key? key,
+    required this.toggleTheme,
+    required this.isDarkMode,
+  }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,58 +26,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     filteredNotes = notes;
-  }
-
-  void addOrEditNote({Note? note, int? index}) {
-    TextEditingController titleController = TextEditingController(text: note?.title ?? "");
-    TextEditingController contentController = TextEditingController(text: note?.content ?? "");
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(note == null ? "Add Note" : "Edit Note"),
-        content: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextField(
-                controller: titleController,
-                decoration: const InputDecoration(labelText: "Title"),
-              ),
-              TextField(
-                controller: contentController,
-                decoration: const InputDecoration(labelText: "Content"),
-                maxLines: 4,
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newNote = Note(
-                title: titleController.text,
-                content: contentController.text,
-                timestamp: DateTime.now(),
-              );
-              setState(() {
-                if (index != null) {
-                  notes[index] = newNote;
-                } else {
-                  notes.add(newNote);
-                }
-                filteredNotes = List.from(notes);
-              });
-              Navigator.pop(context);
-            },
-            child: const Text("Save"),
-          ),
-        ],
-      ),
-    );
   }
 
   void deleteNote(int index) {
@@ -91,6 +45,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void addNote(Note note) {
+    setState(() {
+      notes.add(note);
+      filteredNotes = List.from(notes);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,7 +59,8 @@ class _HomePageState extends State<HomePage> {
         title: const Text("My Notes"),
         actions: [
           IconButton(
-            icon: Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            icon:
+            Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
             onPressed: widget.toggleTheme,
           ),
         ],
@@ -110,10 +72,19 @@ class _HomePageState extends State<HomePage> {
             child: TextField(
               controller: searchController,
               onChanged: searchNotes,
-              decoration: const InputDecoration(
-                labelText: "Search notes",
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              style: TextStyle(
+                  color: widget.isDarkMode ? Colors.white : Colors.black),
+              decoration: InputDecoration(
+                hintText: "Search your notes...",
+                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                filled: true,
+                fillColor: widget.isDarkMode
+                    ? Colors.black12
+                    : Colors.grey.shade200,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
               ),
             ),
           ),
@@ -123,15 +94,19 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (_, index) {
                 final note = filteredNotes[index];
                 return Card(
-                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  margin:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
                     title: Text(note.title),
-                    subtitle: Text(note.content, maxLines: 1, overflow: TextOverflow.ellipsis),
+                    subtitle: Text(
+                      note.content,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => deleteNote(index),
                     ),
-                    onTap: () => addOrEditNote(note: note, index: index),
                   ),
                 );
               },
@@ -139,9 +114,47 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => addOrEditNote(),
-        child: const Icon(Icons.add),
+      bottomNavigationBar: Container(
+        height: 90,
+        color: Colors.black,
+        child: Padding(
+          padding:
+          const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20),
+          child: GNav(
+            gap: 20,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            curve: Curves.linear,
+            backgroundColor: Colors.black,
+            color: Colors.white,
+            activeColor: Colors.white,
+            tabBackgroundColor: Colors.grey.shade800,
+            mainAxisAlignment: MainAxisAlignment.center,
+            onTabChange: (index) async {
+              if (index == 0) {
+                final newNote = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AddNotePage(),
+                  ),
+                );
+                if (newNote != null && newNote is Note) {
+                  addNote(newNote);
+                }
+              } else if (index == 1) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Favorites tapped")),
+                );
+              }
+            },
+            tabs: const [
+              GButton(
+                icon: Icons.add,
+                text: 'Add',
+              )
+
+            ],
+          ),
+        ),
       ),
     );
   }
