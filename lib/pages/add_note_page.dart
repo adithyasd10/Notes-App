@@ -40,6 +40,9 @@ class _AddNotePageState extends State<AddNotePage> {
     int? maxLines,
     bool expands = false,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? const Color(0xFFDFD0B8) : Colors.black87;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
@@ -47,7 +50,7 @@ class _AddNotePageState extends State<AddNotePage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
+            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: Colors.white.withOpacity(0.2),
@@ -67,17 +70,17 @@ class _AddNotePageState extends State<AddNotePage> {
             maxLines: expands ? null : maxLines,
             expands: expands,
             style: TextStyle(
-              color: Theme.of(context).textTheme.bodyMedium?.color,
+              color: textColor,
               fontSize: 16,
             ),
             decoration: InputDecoration(
               labelText: label,
               labelStyle: TextStyle(
-                color: Theme.of(context).textTheme.bodyMedium?.color,
+                color: textColor.withOpacity(0.7),
               ),
               border: InputBorder.none,
             ),
-            cursorColor: Theme.of(context).primaryColor,
+            cursorColor: const Color(0xFF948979), // Accent
           ),
         ),
       ),
@@ -86,15 +89,20 @@ class _AddNotePageState extends State<AddNotePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF222831) : Colors.white;
+    final textColor = isDark ? const Color(0xFFDFD0B8) : Colors.black87;
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('Add Note'),
+        title: Text('Add Note', style: TextStyle(color: textColor)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        iconTheme: IconThemeData(color: textColor),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save),
+            icon: Icon(Icons.save, color: const Color(0xFF948979)),
             onPressed: _saveNote,
           ),
         ],
@@ -103,14 +111,14 @@ class _AddNotePageState extends State<AddNotePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.7),
-              Theme.of(context).scaffoldBackgroundColor.withOpacity(0.9),
+              bgColor.withOpacity(0.9),
+              bgColor.withOpacity(1),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
-        child: SafeArea(  // ⬅️ This adds padding to avoid status bar / notch
+        child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -134,7 +142,6 @@ class _AddNotePageState extends State<AddNotePage> {
           ),
         ),
       ),
-
     );
   }
 }

@@ -54,13 +54,31 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = widget.isDarkMode ? const Color(0xFF222831) : Colors.white;
+    final cardColor =
+    widget.isDarkMode ? const Color(0xFF393E46) : Colors.grey.shade100;
+    final textColor =
+    widget.isDarkMode ? const Color(0xFFDFD0B8) : Colors.black87;
+    final accentColor = widget.isDarkMode ? const Color(0xFF948979) : Colors.grey;
+
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text("My Notes"),
+        backgroundColor: cardColor,
+        elevation: 0,
+        title: Text(
+          "My Notes",
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         actions: [
           IconButton(
-            icon:
-            Icon(widget.isDarkMode ? Icons.light_mode : Icons.dark_mode),
+            icon: Icon(
+              widget.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: accentColor,
+            ),
             onPressed: widget.toggleTheme,
           ),
         ],
@@ -72,17 +90,16 @@ class _HomePageState extends State<HomePage> {
             child: TextField(
               controller: searchController,
               onChanged: searchNotes,
-              style: TextStyle(
-                  color: widget.isDarkMode ? Colors.white : Colors.black),
+              style: TextStyle(color: textColor),
               decoration: InputDecoration(
                 hintText: "Search your notes...",
-                prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                hintStyle: TextStyle(color: accentColor),
+                prefixIcon: Icon(Icons.search, color: accentColor),
                 filled: true,
-                fillColor: widget.isDarkMode
-                    ? Colors.black12
-                    : Colors.grey.shade200,
+                fillColor:
+                widget.isDarkMode ? const Color(0xFF393E46) : Colors.grey.shade200,
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(25),
                   borderSide: BorderSide.none,
                 ),
               ),
@@ -94,17 +111,30 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (_, index) {
                 final note = filteredNotes[index];
                 return Card(
+                  color: cardColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
                   margin:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   child: ListTile(
-                    title: Text(note.title),
+                    title: Text(
+                      note.title,
+                      style: TextStyle(
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     subtitle: Text(
                       note.content,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: TextStyle(color: accentColor),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: const Icon(Icons.delete),
+                      color: Colors.redAccent,
                       onPressed: () => deleteNote(index),
                     ),
                   ),
@@ -115,19 +145,30 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       bottomNavigationBar: Container(
-        height: 90,
-        color: Colors.black,
+        margin: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: widget.isDarkMode
+              ? Colors.black.withOpacity(0.3)
+              : Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+            )
+          ],
+        ),
         child: Padding(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 15.0, vertical: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10),
           child: GNav(
-            gap: 20,
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            curve: Curves.linear,
-            backgroundColor: Colors.black,
-            color: Colors.white,
-            activeColor: Colors.white,
-            tabBackgroundColor: Colors.grey.shade800,
+            gap: 12,
+            padding:
+            const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            backgroundColor: Colors.transparent,
+            color: accentColor,
+            activeColor: widget.isDarkMode ? Colors.white : Colors.black,
+            tabBackgroundColor:
+            widget.isDarkMode ? Colors.grey.shade800 : Colors.grey.shade200,
             mainAxisAlignment: MainAxisAlignment.center,
             onTabChange: (index) async {
               if (index == 0) {
@@ -150,8 +191,11 @@ class _HomePageState extends State<HomePage> {
               GButton(
                 icon: Icons.add,
                 text: 'Add',
-              )
-
+              ),
+              GButton(
+                icon: Icons.star,
+                text: 'Favorites',
+              ),
             ],
           ),
         ),
