@@ -53,7 +53,8 @@ class NoteDataProvider extends ChangeNotifier {
   void toggleFavorite(Note note) {
     final index = _notes.indexOf(note);
     if (index != -1) {
-      _notes[index].isFavorite = !_notes[index].isFavorite;
+      final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
+      _notes[index] = updatedNote;
       saveNotes();
       notifyListeners();
     }

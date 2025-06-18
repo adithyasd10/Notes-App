@@ -50,11 +50,15 @@ class _AddNotePageState extends State<AddNotePage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.white.withOpacity(0.1),
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.white.withOpacity(0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1.2,
+              color: isDark
+                  ? Colors.black.withOpacity(0.3) // white border for dark mode
+                  : Colors.grey.withOpacity(0.5), // black border for light mode
+              width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
@@ -80,18 +84,18 @@ class _AddNotePageState extends State<AddNotePage> {
               ),
               border: InputBorder.none,
             ),
-            cursorColor: const Color(0xFF948979), // Accent
+            cursorColor: const Color(0xFF948979),
           ),
         ),
       ),
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF222831) : Colors.white;
-    final textColor = isDark ? const Color(0xFFDFD0B8) : Colors.black87;
+    final theme = Theme.of(context);
+    final textColor = theme.textTheme.bodyMedium?.color ?? Colors.black87;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -102,7 +106,7 @@ class _AddNotePageState extends State<AddNotePage> {
         iconTheme: IconThemeData(color: textColor),
         actions: [
           IconButton(
-            icon: Icon(Icons.save, color: const Color(0xFF948979)),
+            icon: const Icon(Icons.save, color: Color(0xFF292727)),
             onPressed: _saveNote,
           ),
         ],
@@ -111,8 +115,8 @@ class _AddNotePageState extends State<AddNotePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              bgColor.withOpacity(0.9),
-              bgColor.withOpacity(1),
+              theme.scaffoldBackgroundColor.withOpacity(0.92),
+              theme.scaffoldBackgroundColor.withOpacity(1),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -128,7 +132,7 @@ class _AddNotePageState extends State<AddNotePage> {
                   label: 'Title',
                   maxLines: 1,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
                 Expanded(
                   child: _buildGlassTextField(
                     controller: _contentController,
