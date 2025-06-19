@@ -1,45 +1,40 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hive/hive.dart';
 import 'note.dart';
 
 class NoteDataProvider extends ChangeNotifier {
+  final Box<Note> _box = Hive.box<Note>('notesBox');
+
   List<Note> _notes = [];
 
   List<Note> get allNotes => _notes;
 
   Future<void> loadNotes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString('notes');
-    if (jsonString != null) {
-      final List jsonData = jsonDecode(jsonString);
-      _notes = jsonData.map((e) => Note.fromJson(e)).toList();
-    }
+    _notes = _box.values.toList();
     notifyListeners();
   }
 
   Future<void> saveNotes() async {
-    final prefs = await SharedPreferences.getInstance();
-    final encoded = jsonEncode(_notes.map((n) => n.toJson()).toList());
-    await prefs.setString('notes', encoded);
+    // Hive auto-saves, so this is just a placeholder
+    notifyListeners();
   }
 
   void addNote(Note note) {
-    _notes.add(note);
-    saveNotes();
+    _box.add(note);
+    _notes = _box.values.toList();
     notifyListeners();
   }
 
   void updateNote(Note oldNote, Note newNote) {
-    final idx = _notes.indexOf(oldNote);
-    if (idx >= 0) _notes[idx] = newNote;
-    saveNotes();
+    final key = oldNote.key;
+    _box.put(key, newNote);
+    _notes = _box.values.toList();
     notifyListeners();
   }
 
   void deleteNote(Note note) {
-    _notes.remove(note);
-    saveNotes();
+    note.delete(); // delete by reference
+    _notes = _box.values.toList();
     notifyListeners();
   }
 
@@ -50,14 +45,12 @@ class NoteDataProvider extends ChangeNotifier {
           note.content.toLowerCase().contains(query);
     }).toList();
   }
+
   void toggleFavorite(Note note) {
     final index = _notes.indexOf(note);
     if (index != -1) {
       final updatedNote = note.copyWith(isFavorite: !note.isFavorite);
-      _notes[index] = updatedNote;
-      saveNotes();
-      notifyListeners();
+      updateNote(note, updatedNote);
     }
   }
-
 }

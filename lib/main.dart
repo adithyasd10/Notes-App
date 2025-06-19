@@ -3,8 +3,35 @@ import 'package:notes/pages/splash_screen.dart';
 import 'package:provider/provider.dart';
 import 'models/note_data.dart';
 import 'pages/homepage.dart';
+// ✅ Hive-related imports
+import 'package:hive_flutter/hive_flutter.dart';
+import 'models/note.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Hive
+  await Hive.initFlutter();
+  Hive.registerAdapter(NoteAdapter());
+
+  // Open Hive box
+  await Hive.openBox<Note>('notesBox');
+  print('✅ Hive box opened: ${Hive.box<Note>('notesBox').name}');
+
+  // ✅ Add test note (optional debug)
+  final box = Hive.box<Note>('notesBox');
+  if (box.isEmpty) {
+    final testNote = Note(
+      title: 'Hive Test Note',
+      content: 'This is saved using Hive 🎉',
+      timestamp: DateTime.now(),
+    );
+    await box.add(testNote);
+    print('📦 Test note added to Hive.');
+  } else {
+    print('📦 Hive already contains ${box.length} notes.');
+  }
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => NoteDataProvider()..loadNotes(),
