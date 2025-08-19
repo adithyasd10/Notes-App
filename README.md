@@ -37,3 +37,5 @@ git clone https://github.com/your-username/flutter-notes-app.git
 cd flutter-notes-app
 flutter pub get
 flutter run
+
+:)
